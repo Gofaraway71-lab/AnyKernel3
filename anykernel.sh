@@ -5,6 +5,7 @@
 # begin properties
 properties() { '
 kernel.string=Kyuofox-Kernel
+kernel.maintainer=Github.com/KyuoFoxHuyu
 do.devicecheck=1
 do.modules=0
 do.systemless=1

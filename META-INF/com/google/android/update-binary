@@ -466,6 +466,9 @@ fi;
 
 KERNEL_STRING="$(file_getprop anykernel.sh kernel.string)";
 ui_print "$KERNEL_STRING";
+
+KERNEL_MAINTAINER="$(file_getprop anykernel.sh kernel.maintainer)";
+ui_print "$KERNEL_MAINTAINER";
 if [ -f version ]; then
   ui_print " ";
   ui_printfile version;
