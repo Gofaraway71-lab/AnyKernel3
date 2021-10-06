@@ -484,7 +484,11 @@ do_devicecheck;
 do_versioncheck;
 do_levelcheck;
 
+if [ -e dtb ]; then
+ui_print "Installing kernel and dtb...";
+else
 ui_print "Installing...";
+fi
 CORE=$($BB grep -oE 'ak.*core.sh' anykernel.sh);
 [ -f tools/$CORE ] || $BB ln -s $AKHOME/tools/ak*-core.sh $AKHOME/tools/$CORE;
 PATH="$AKHOME/bin:$PATH" home=$AKHOME $BB ash anykernel.sh $2;
