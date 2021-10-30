@@ -505,4 +505,9 @@ if [ "$(file_getprop anykernel.sh do.cleanup)" == 1 ]; then
   cleanup;
 fi;
 
+if [ -e "/dev/block/by-name/oops" ]; then
+  ui_print " " "Cleaning mtdoops area";
+  dd if=/dev/zero of=/dev/block/by-name/oops;
+fi;
+
 ui_print " " " " "Done!";
