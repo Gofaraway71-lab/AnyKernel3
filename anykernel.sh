@@ -16,7 +16,7 @@ device.name2=lmi
 device.name3=Lmi
 device.name4=Poco F2 Pro
 device.name5=
-supported.versions=11
+supported.versions=11,12
 supported.patchlevels=
 '; } # end properties
 
