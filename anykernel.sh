@@ -2,7 +2,7 @@
 ## osm0sis @ xda-developers
 
 ### AnyKernel setup
-# begin properties
+# global properties
 properties() { '
 kernel.string=Kyuofox-Kernel
 kernel.maintainer=Made by Github.com/Kyuofox
@@ -19,6 +19,7 @@ device.name5=
 supported.versions=11,12,13
 supported.patchlevels=
 '; } # end properties
+
 
 ### AnyKernel install
 ## boot files attributes
