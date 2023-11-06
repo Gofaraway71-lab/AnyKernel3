@@ -479,7 +479,8 @@ flash_generic() {
       abort "$1 partition could not be found. Aborting...";
     fi;
     if [ ! "$no_block_display" ]; then
-      ui_print " " "$imgblock";
+      ui_print " " "Installing $1 image...";
+      ui_print "Found: $imgblock";
     fi;
     if [ "$path" == "/dev/block/mapper" ]; then
       avb=$($bin/httools_static avb $1);
