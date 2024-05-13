@@ -60,6 +60,17 @@ if [ -n "$(ls /data/gsi/ota)" ]; then
     write_boot; # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
 fi
 
+# Patch vbmeta
+ui_print " "
+for vbmeta_blk in /dev/block/bootdevice/by-name/vbmeta${slot} /dev/block/bootdevice/by-name/vbmeta_system${slot}; do
+ ui_print "- Patching ${vbmeta_blk} ..."
+ ${bin}/vbmeta-disable-verification $vbmeta_blk || {
+  ui_print "! Failed to patching ${vbmeta_blk}!"
+  ui_print "- If the device won't boot after the installation,"
+  ui_print "  please manually disable AVB in TWRP."
+ }
+done
+
 ## init_boot files attributes
 #init_boot_attributes() {
 #set_perm_recursive 0 0 755 644 $ramdisk/*;
