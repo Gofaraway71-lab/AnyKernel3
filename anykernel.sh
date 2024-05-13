@@ -11,12 +11,12 @@ do.modules=0
 do.systemless=1
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=Redmi K30 Pro
-device.name2=lmi
-device.name3=Lmi
-device.name4=Poco F2 Pro
+device.name1=
+device.name2=
+device.name3=
+device.name4=
 device.name5=
-supported.versions=11,12,13,14
+supported.versions=
 supported.patchlevels=
 supported.vendorpatchlevels=
 '; } # end properties
