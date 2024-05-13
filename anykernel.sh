@@ -45,6 +45,20 @@ dump_boot; # use split_boot to skip ramdisk unpack, e.g. for devices with init_b
 write_boot; # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
 ## end boot install
 
+# check ota
+if [ -n "$(ls /data/gsi/ota)" ]; then
+    case "$(getprop ro.boot.slot_suffix)" in
+    _a)
+        block="/dev/block/by-name/boot_b"
+        ;;
+    _b)
+        block="/dev/block/by-name/boot_a"
+        ;;
+    esac
+    ui_print "Detected OTA, set boot to $block"
+    dump_boot; # use split_boot to skip ramdisk unpack, e.g. for devices with init_boot ramdisk
+    write_boot; # use flash_boot to skip ramdisk repack, e.g. for devices with init_boot ramdisk
+fi
 
 ## init_boot files attributes
 #init_boot_attributes() {
