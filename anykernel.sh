@@ -11,12 +11,12 @@ do.modules=0
 do.systemless=1
 do.cleanup=1
 do.cleanuponabort=0
-device.name1=
-device.name2=
-device.name3=
-device.name4=
+device.name1=Redmi Note 12 Turbo
+device.name2=POCO F5
+device.name3=marble
+device.name4=marblein
 device.name5=
-supported.versions=
+supported.versions=14
 supported.patchlevels=
 supported.vendorpatchlevels=
 '; } # end properties
