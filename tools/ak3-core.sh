@@ -144,8 +144,6 @@ split_boot() {
 # unpack_ramdisk (extract ramdisk only)
 unpack_ramdisk() {
   local comp;
-  local cpio_file;
-  local cpio_files;
 
   cd $SPLITIMG;
   if [ -f ramdisk.cpio.gz ]; then
@@ -158,16 +156,8 @@ unpack_ramdisk() {
 
   if [ -f ramdisk.cpio ]; then
     comp=$(magiskboot decompress ramdisk.cpio 2>&1 | grep -v 'raw' | sed -n 's;.*\[\(.*\)\];\1;p');
-  elif [ -d vendor_ramdisk ]; then
-    # If the vendor_ramdisk directory exists, it means that the image was unpacked by magiskboot,
-    # and the cpio archive files must have been decompressed during the unpacking process.
-    # Therefore, we skip setting the `comp` variable here, and we don't need to determine the compression algorithm.
-    if [ ! -f vendor_ramdisk/ramdisk.cpio ]; then
-      abort "Unsupported ramdisk file format. Aborting...";
-    fi;
-    cpio_files="$SPLITIMG/vendor_ramdisk/ramdisk.cpio $(ls -1 $SPLITIMG/vendor_ramdisk/*.cpio | grep -vE '/ramdisk\.cpio$')";
   else
-    echo "No ramdisk found to unpack. But not aborting :)...";
+    abort "No ramdisk found to unpack. Aborting...";
   fi;
   if [ "$comp" ]; then
     mv -f ramdisk.cpio ramdisk.cpio.$comp;
@@ -183,19 +173,9 @@ unpack_ramdisk() {
   chmod 755 $RAMDISK;
 
   cd $RAMDISK;
-  if [ "$cpio_files" ]; then
-    # Unpack all vendor ramdisk cpio
-    for cpio_file in ${cpio_files}; do
-      ui_print "- Unpacking $(basename $cpio_file)...";
-      magiskboot cpio $cpio_file extract;
-    done;
-  else
-    ui_print " "
-    ui_print "- Unpacking ramdisk.cpio...";
-    magiskboot cpio $SPLITIMG/ramdisk.cpio extract;
-  fi
+  EXTRACT_UNSAFE_SYMLINKS=1 cpio -d -F $SPLITIMG/ramdisk.cpio -i;
   if [ $? != 0 -o ! "$(ls)" ]; then
-    echo "Unpacking ramdisk failed. But not aborting :)...";
+    abort "Unpacking ramdisk failed. Aborting...";
   fi;
   if [ -d "$AKHOME/rdtmp" ]; then
     cp -af $AKHOME/rdtmp/* .;
@@ -228,12 +208,11 @@ repack_ramdisk() {
     *) comp=$RAMDISK_COMPRESSION;;
   esac;
 
-  ui_print "- Repacking ramdisk.cpio...";
   if [ -f "$BIN/mkbootfs" ]; then
     mkbootfs $RAMDISK > ramdisk-new.cpio;
   else
     cd $RAMDISK;
-    find . | grep -vE '^\.$' | sort | cpio -H newc -o > $AKHOME/ramdisk-new.cpio;
+    find . | cpio -H newc -o > $AKHOME/ramdisk-new.cpio;
   fi;
   [ $? != 0 ] && packfail=1;
 
@@ -242,7 +221,7 @@ repack_ramdisk() {
     magiskboot cpio ramdisk-new.cpio test;
     magisk_patched=$?;
   fi;
-  [ "$magisk_patched" -eq 1 ] && magiskboot cpio ramdisk-new.cpio "extract .backup/.magisk $SPLITIMG/.magisk";
+  [ $((magisk_patched & 3)) -eq 1 ] && magiskboot cpio ramdisk-new.cpio "extract .backup/.magisk $SPLITIMG/.magisk";
   if [ "$comp" ]; then
     magiskboot compress=$comp ramdisk-new.cpio;
     if [ $? != 0 ] && $comp --help 2>/dev/null; then
@@ -253,7 +232,7 @@ repack_ramdisk() {
     fi;
   fi;
   if [ "$packfail" ]; then
-    echo "Repacking ramdisk failed. But not aborting :)...";
+    abort "Repacking ramdisk failed. Aborting...";
   fi;
 
   if [ -f "$BIN/mkmtkhdr" -a -f "$SPLITIMG/boot.img-base" ]; then
@@ -266,7 +245,7 @@ repack_ramdisk() {
 
 # flash_boot (build, sign and write image only)
 flash_boot() {
-  local varlist i f kernel ramdisk fdt cmdline comp part0 part1 nocompflag signfail pk8 cert avbtype;
+  local varlist i kernel ramdisk fdt cmdline comp part0 part1 nocompflag signfail pk8 cert avbtype;
 
   cd $SPLITIMG;
   if [ -f "$BIN/mkimage" ]; then
@@ -336,18 +315,7 @@ flash_boot() {
     mkbootimg --kernel $kernel --ramdisk $ramdisk --cmdline "$cmdline" --base $base --pagesize $pagesize --kernel_offset $kernel_offset --ramdisk_offset $ramdisk_offset --tags_offset "$tags_offset" $dt --output $AKHOME/boot-new.img;
   else
     [ "$kernel" ] && cp -f $kernel kernel;
-    if [ "$ramdisk" ]; then
-      if [ -d vendor_ramdisk ]; then
-        # Replace all vendor ramdisk cpio archives with empty cpio ones
-        for f in vendor_ramdisk/*.cpio; do
-          cp -f $BIN/_extra/empty.cpio $f;
-        done;
-        # Then, replace the original ramdisk.cpio with the integrated and repackaged ramdisk.cpio
-        mv -f $ramdisk vendor_ramdisk/ramdisk.cpio;
-      else
-        cp -f $ramdisk ramdisk.cpio;
-      fi;
-    fi;
+    [ "$ramdisk" ] && cp -f $ramdisk ramdisk.cpio;
     [ "$dt" -a -f extra ] && cp -f $dt extra;
     for i in dtb recovery_dtbo; do
       [ "$(eval echo \$$i)" -a -f $i ] && cp -f $(eval echo \$$i) $i;
@@ -358,7 +326,7 @@ flash_boot() {
           magiskboot cpio ramdisk.cpio test;
           magisk_patched=$?;
         fi;
-        if [ "$magisk_patched" -eq 1 ]; then
+        if [ $((magisk_patched & 3)) -eq 1 ]; then
           ui_print " " "Magisk detected! Patching kernel so reflashing Magisk is not necessary...";
           comp=$(magiskboot decompress kernel 2>&1 | grep -vE 'raw|zimage' | sed -n 's;.*\[\(.*\)\];\1;p');
           (magiskboot split $kernel || magiskboot decompress $kernel kernel) 2>/dev/null;
@@ -510,13 +478,12 @@ flash_generic() {
       abort "$1 partition could not be found. Aborting...";
     fi;
     if [ ! "$NO_BLOCK_DISPLAY" ]; then
-      ui_print " " "Installing $1 image...";
-      ui_print "Found: $imgblock";
+      ui_print " " "$imgblock";
     fi;
     if [ "$path" == "/dev/block/mapper" ]; then
       avb=$(httools_static avb $1);
       [ $? == 0 ] || abort "Failed to parse fstab entry for $1. Aborting...";
-      if [ "$avb" ] && [ ! "$NO_VBMETA_PARTITION_PATCH" ]; then
+      if [ "$avb" ]; then
         flags=$(httools_static disable-flags);
         [ $? == 0 ] || abort "Failed to parse top-level vbmeta. Aborting...";
         if [ "$flags" == "enabled" ]; then
@@ -968,8 +935,7 @@ setup_ak() {
     abort "Unable to determine $BLOCK partition. Aborting...";
   fi;
   if [ ! "$NO_BLOCK_DISPLAY" ]; then
-    ui_print "Installing $name image...";
-    ui_print "Found: $BLOCK";
+    ui_print "$BLOCK";
   fi;
   
   # allow multi-partition ramdisk modifying configurations (using reset_ak)

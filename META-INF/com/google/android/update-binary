@@ -546,15 +546,63 @@ fi;
 
 KERNEL_STRING="$(file_getprop anykernel.sh kernel.string)";
 ui_print "$KERNEL_STRING";
-
-KERNEL_MAINTAINER="$(file_getprop anykernel.sh kernel.maintainer)";
-ui_print "$KERNEL_MAINTAINER";
 if [ -f version ]; then
   ui_print " ";
   ui_printfile version;
   ui_print " ";
 fi;
-ui_print " " "AnyKernel3 by osm0sis @ xda-developers";
+ui_print " ";
+ui_print "|-INFORMATION----------------------------------|";
+ui_print "|                  _             _             |";
+ui_print "|        _ __  ___(_) ___  _ __ (_) ___        |";
+ui_print "|       | '_ \/ __| |/ _ \| '_ \| |/ __|       |";
+ui_print "|       | |_) \__ \ | (_) | | | | | (__        |";
+ui_print "|       | .__/|___/_|\___/|_| |_|_|\___|       |";
+ui_print "|       |_|The poison for custom android       |";
+ui_print "|                                              |";
+ui_print "| psionicprjkt is a project created especially |";
+ui_print "|  for android development, providing custom   |";
+ui_print "|       roms, custom kernels and FOSS!         |";
+ui_print "|                                              |";
+ui_print "|--------------psionicpjrkt.my.id--------------|";
+ui_print "|----------------------------------------------|";
+ui_print "|    AnyKernel3 by osm0sis @ xda-developers    |";
+ui_print "|----------------------------------------------|";
+ui_print " ";
+ui_print "|-OTHERS---------------------------------------|";
+ui_print "|                                              |";
+ui_print "| Primary Repositories:                        |";
+ui_print "| - https://github.com/psionicprjkt            |";
+ui_print "| - https://github.com/officialputuid          |";
+ui_print "| - https://gitlab.com/officialputuid          |";
+ui_print "|                                              |";
+ui_print "| Telegram Channels:                           |";
+ui_print "| - https://t.me/psionicprjkt (CH)             |";
+ui_print "| - https://t.me/psionicprjktlogs (CH)         |";
+ui_print "| - https://t.me/psionicprjktchat (Group)      |";
+ui_print "|                                              |";
+ui_print "| Donate to Support Us:                        |";
+ui_print "| - https://paypal.me/IPJAP                    |";
+ui_print "| - https://trakteer.id/officialputuid         |";
+ui_print "| - https://github.com/sponsors/officialputuid |";
+ui_print "|----------------------------------------------|";
+ui_print " ";
+ui_print "|-WARNING--------------------------------------|";
+ui_print "|                                              |";
+ui_print "| Your warranty is now void.                   |";
+ui_print "|                                              |";
+ui_print "| We are not responsible for anything          |";
+ui_print "| that may happen to your phone by installing  |";
+ui_print "| any custom ROMs and/or kernels.              |";
+ui_print "|                                              |";
+ui_print "| You do it at your own risk and take the      |";
+ui_print "| responsibility upon yourself and you are     |";
+ui_print "| not to blame us & its respected developers.  |";
+ui_print "|                                              |";
+ui_print "|----------------------------------------------|";
+ui_print "|--------------by @officialputuid--------------|";
+ui_print "|----------------------------------------------|";
+ui_print " ";
 grep -oE 'AK_BASE.*' META-INF/com/google/android/updater-script >&2;
 ui_print " ";
 
@@ -565,6 +613,7 @@ do_versioncheck;
 do_levelcheck;
 do_vendorlevelcheck;
 
+ui_print "Installing...";
 # hack to maintain support for anykernel.sh files that weren't updated correctly along with the AK core
 CORE=$(grep -oE 'ak.*core.sh' anykernel.sh);
 [ -f tools/$CORE ] || ln -s $AKHOME/tools/ak*-core.sh $AKHOME/tools/$CORE;
@@ -583,6 +632,6 @@ if [ "$(file_getprop anykernel.sh do.cleanup)" == 1 ]; then
   cleanup;
 fi;
 
-ui_print "Done!";
+ui_print " " "Done!";
 export PATH="$OLD_PATH";
 unset OLD_PATH OUTFD ZIPFILE;
