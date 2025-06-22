@@ -30,7 +30,7 @@ device.name17=RMX2161
 device.name18=RMX2161L1
 device.name19=RMX2163
 device.name20=RMX2163L1
-supported.versions=11-15
+supported.versions=11-16
 supported.patchlevels=
 supported.vendorpatchlevels=
 '; } # end properties
